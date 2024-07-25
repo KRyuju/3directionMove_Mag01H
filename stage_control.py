@@ -1,0 +1,186 @@
+import os
+import sys
+import time
+import serial
+from serial.tools import list_ports
+
+# print(os.path.exists(move_schedule))
+
+
+def setup(move_schedule = "move_schedule.txt"):
+    Parameter = {}
+
+    try:
+        ports = list(list_ports.comports())
+        port_number = int(sys.argv[1])
+    except IndexError:
+        if (len(ports) == 0):
+            print("デバイスが認識できません\r\n接続を確認してください")
+            exit()
+        i = 0
+        for p in ports:
+            i += 1
+            print("[" + str(i) + "]." + p.description)
+    
+        port_number  = input("接続するポートの[]番号：")
+        # port_number = 1
+        while True:
+            try:
+                port_number = int(port_number)
+                if port_number > len(ports):
+                    raise ValueError
+                if port_number == 0:
+                    raise ValueError
+            except ValueError:
+                print("エラー：無効な入力")
+                port_number  = input("接続するポートの[]番号：")
+            else:
+                break
+
+    try:
+        ser = []
+        port_name = ports[port_number-1].device
+        ser = serial.Serial(port_name , 9600, timeout=2, write_timeout=5)
+        # ser = serial.Serial("COM11" , 9600)
+        print(">>> " + port_name, end="    ")
+        print("Checking Connection")
+        ser.write("?:V\r\n".encode())
+
+        print("AAAA")
+        
+        back = ser.readline().decode()
+        # back = "a"
+        if back.startswith("V"):
+            Parameter.update({"ControllerStatus":True})
+            print(back.replace("\r\n",''), end="    ")
+            print("Connection OK")
+        else:
+            raise serial.SerialException
+    except serial.SerialException:
+        Parameter.update({"ControllerStatus":False})
+        print("ERROR : Could't Connect to Controller")
+        
+        #exit()
+
+    Parameter.update({"ControllerPortName":port_name})
+
+    try:
+        f = open(move_schedule, "r")
+    except FileNotFoundError:
+        print("ERROR : Could not find Route-File")
+        exit()
+
+    lines = f.readlines()
+    f.close
+
+    area = lines[1].rstrip("\n")
+    Parameter.update({"RouteInfo":area})
+
+    start = 0
+    for line in lines:
+        if (line == "-START-\n"):
+            break
+        start +=1
+    Parameter.update({"RouteMap":lines[start:]})
+
+    return Parameter
+
+def wait(ser):
+    back = ""
+    ser.timeout = 0.5
+    while True:
+        back = ser.readline().decode()
+        if back == "": break
+
+    ser.timeout = 0.5
+    ser.write("!:\r\n".encode())
+    back = ser.readline().decode()
+    print("waiting", back.replace("\r",""), end="")
+    
+    if back.startswith("R"):
+        print("\nOK\n")
+        return True
+
+    else:
+        # print("busy")
+        return False
+
+def move(ser, routeMap, step, checkOrigin):
+
+    stepTotal = len(routeMap)
+    
+    if stepTotal <= step:
+        print("out of range")
+        return False
+
+    print("step " + str(step) + " / " + str(stepTotal-1))
+    command = str(routeMap[step])
+    f = open(os.path.dirname(__file__) + "/serialMonitor.txt", "w")
+    f.write(command)
+    f.close
+
+    if command.startswith("-S"):
+        if checkOrigin[0]:
+            print("origin : START")
+            ser.write("H:W\r\n".encode())
+        else:
+            print("       : START")
+
+        return True
+
+    if command.startswith("-E"):
+        if checkOrigin[1]:
+            print("origin : FINISH")
+            ser.write("H:W\r\n".encode())
+        else:
+            print("       : FINISH")
+
+        return False
+    
+    print("move", command, end="")
+    
+    ser.write(command.encode())
+    ser.write("G:\r\n".encode())
+
+    return True
+
+def main():
+
+    parameter = setup()
+
+    print(parameter)
+
+    ser = serial.Serial(parameter["ControllerPortName"], 9600)
+    # ser = serial.Serial("COM11", 9600)
+    
+    # ser.write("H:W\r\n".encode())
+
+    i = 0
+    inputTime = 0
+    flag = "WAIT"
+    while True:
+
+        if (time.time() - inputTime) < 0.5:
+            continue
+
+        if flag == "WAIT":
+            if wait(ser):
+                flag = "move"
+
+        if flag == "move":
+            if not move(ser,parameter["RouteMap"],i):
+                break
+
+            i+=1
+            flag = "WAIT"
+
+        # input("Press any button >>")
+        print()
+        inputTime = time.time()
+
+    print("end")
+    ser.close()
+
+
+if __name__ == "__main__":
+    main()

@@ -11,6 +11,8 @@ import serial
 
 # import Image
 # import read_image_mag01h
+
+import read_keithey2000
 import stage_control
 
 #! スタート前 チェックリスト
@@ -40,7 +42,7 @@ move_schedule = "./sample/"
 
 
 stageParameter = {}
-THM1176Parameter = {}
+keithley2000Parameter = {}
 
 if startCheckOrigin or endCheckOrigin:
     confirm = input(" \"CheckOrigin\" command is enabled. Confirm?  (y/n) >> ")
@@ -48,15 +50,19 @@ if startCheckOrigin or endCheckOrigin:
         exit()
 
 def setup():
-    global stageParameter, THM1176Parameter
+    global stageParameter, keithley2000Parameter
+    
+    
+    keithley2000Parameter = read_keithey2000.setup()
+
     stageParameter = stage_control.setup(move_schedule)
     
     stageParameter.update({"startCheckOrigin":startCheckOrigin})
     stageParameter.update({"endCheckOrigin":endCheckOrigin})
 
     # Image.Parameter("Parameters")
-
-    print(THM1176Parameter)
+    
+    print(keithley2000Parameter)
     print(stageParameter)
 
     if os.path.exists(save_file):
@@ -87,18 +93,17 @@ def main():
     
     setup()
 
-    cap = cv2.VideoCapture(1)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
     f = open(save_file, "a")
 
     ser = ""
     if stageParameter["ControllerStatus"]:
-        ser = serial.Serial(stageParameter["ControllerPortName"], 9600)
+        ser = serial.Serial(stageParameter["ControllerPortName"], 9600, timeout=5, write_timeout=5)
     
-    #ser = serial.Serial("COM11", 9600)
-    
+    multimeter = ""
+    if keithley2000Parameter["MultimeterStatus"]:
+        multimeter = serial.Serial(keithley2000Parameter["MultimeterPortName"], 9600, timeout=5, write_timeout=5)
+        read_keithey2000.initialize_keithley2000(multimeter)
+        
     FLAG = "WAIT"
 
     print("ser start")
@@ -178,31 +183,16 @@ def main():
             if measureCount == 0:
                 f = open(save_file, "a")
 
-            #! Mag_data = THM1176.read_THM1176(THM1176Parameter)
-
-            # result = pyTHM1176.measure_one(pyTHM1176.probe()).split()
-            # result = pyTHM1176.measure_Average(pyTHM1176.probe(), 10).split()
-
-            ret, img = cap.read()
-
-            cv2.imshow("cadhf", img)
-
-            # Mag_data = read_image_mag01h.read_Mag01H(img, (x_now, y_now, measureCount))
             time.sleep(1)
+            
+            result = read_keithey2000.read_keithley2000(multimeter)
 
-            # print("res", result)
-
-            # Mag_data = ["True", result[8], result[2], result[4], result[6]]
-
-            Mag_data = [True, 222.22, 222.29, 222.29, 222.29]
-
-
-            # Mag_data = 0
+            Mag_data = [True, 0, result, 0, 0]
 
             if Mag_data[0]:
                 print(str(measureCount+1) + "/" + str(average), Mag_data, end="\n\n")
 
-                Mag_data[0:0] = (x_now, y_now, 0)
+                Mag_data[0:0] = (x_now, y_now, z_now)
 
                 for i in range(len(Mag_data)):
                     if i != 0: f.write(",")
@@ -217,10 +207,6 @@ def main():
                 f.close()
                 FLAG = "MOVE"
 
-            
-    
-
-        LastTime = time.time()
 
     with open(save_file, mode="r+") as f:
         l = f.readlines()

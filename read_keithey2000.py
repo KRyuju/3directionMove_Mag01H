@@ -1,13 +1,15 @@
+import os
+import sys
 import time
 import serial
-import serial.tools.list_ports
+from serial.tools import list_ports
 
 
 def connection_test():
     target_name = "2303"
     ser_name = ""
     
-    ports = serial.tools.list_ports.comports()
+    ports = list_ports.comports()
     for port in ports:
         # print(port.hwid)
         if target_name in port.hwid:
@@ -22,6 +24,64 @@ def connection_test():
     # # ser.write(b":SYST:BEEP:STAT OFF\n")
     # # print(back)
     # ser.close()
+    
+def setup():
+    Parameter = {}
+
+    try:
+        ports = list(list_ports.comports())
+        port_number = int(sys.argv[2])
+    except IndexError:
+        if (len(ports) == 0):
+            print("デバイスが認識できません\r\n接続を確認してください")
+            exit()
+        i = 0
+        for p in ports:
+            i += 1
+            print("[" + str(i) + "]." + p.description)
+    
+        port_number  = input("Keithley2000 接続ポートの[]番号：")
+        # port_number = 1
+        while True:
+            try:
+                port_number = int(port_number)
+                if port_number > len(ports):
+                    raise ValueError
+                if port_number == 0:
+                    raise ValueError
+            except ValueError:
+                print("エラー：無効な入力")
+                port_number  = input("Keithley2000 接続ポートの[]番号：")
+            else:
+                break
+
+    try:
+        ser = []
+        port_name = ports[port_number-1].device
+        ser = serial.Serial(port_name , 9600, timeout=2, write_timeout=5)
+        print(">>> " + port_name, end="    ")
+        print("Checking Connection")
+        ser.write("*IDN?\r\n".encode())
+
+        print("AAAA")
+        
+        back = ser.readline().decode()
+        # back = "a"
+        if not back.startswith(""):
+            Parameter.update({"MultimeterStatus":True})
+            print(back.replace("\r\n",''), end="    ")
+            print("Connection OK")
+        else:
+            raise serial.SerialException
+    except serial.SerialException:
+        Parameter.update({"MultimeterStatus":False})
+        print("ERROR : Could't Connect to Multimeter")
+        
+        #exit()
+
+    Parameter.update({"MultimeterPortName":port_name})
+
+    return Parameter
 
 
 def initialize_keithley2000(serial_connection):
@@ -32,7 +92,7 @@ def initialize_keithley2000(serial_connection):
     time.sleep(1)  # Wait for reset to complete
     serial_connection.write(b':CONF:VOLT:DC\n')  # Configure for DC voltage measurement
     serial_connection.write(b':SENS:VOLT:DC:NPLC 1\n')  # Set integration time to 10 power line cycles
-    serial_connection.write(b':SENS:VOLT:DC:RANG 10\n')  # Enable auto range
+    serial_connection.write(b':SENS:VOLT:DC:RANG 10\n')
 
 
 def read_keithley2000(serial_connection):

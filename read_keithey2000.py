@@ -66,6 +66,7 @@ def setup():
         print("AAAA")
         
         back = ser.readline().decode()
+        print(back)
         # back = "a"
         if not back.startswith(""):
             Parameter.update({"MultimeterStatus":True})
@@ -74,7 +75,7 @@ def setup():
         else:
             raise serial.SerialException
     except serial.SerialException:
-        Parameter.update({"MultimeterStatus":False})
+        Parameter.update({"MultimeterStatus":True})
         print("ERROR : Could't Connect to Multimeter")
         
         #exit()

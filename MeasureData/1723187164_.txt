@@ -1,0 +1,5 @@
+#------------------------------------
+2024/08/09 16:06:09  start
+x, y, z, status, B, Bx, By, Bz   3 Measure/1point
+Area : X7 Y8 Z6 I5 T27 -Push_Push_Push -Absolute A3
+#------------------------------------

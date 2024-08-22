@@ -27,15 +27,16 @@ fin
 """
 
 #?----------------------------------------
-average = 3
+average = 1
 
 #開始,終了時に機械原点を出すか
-startCheckOrigin = False
+startCheckOrigin = True
 endCheckOrigin = False
 
-save_file = os.path.dirname(__file__) + "/" + "MeasureData/" + str(int(time.time())) + "_" + "" + ".txt"
+# save_file = os.path.dirname(__file__) + "/" + "MeasureData/" + str(int(time.time())) + "_" + "" + ".txt"
+save_file = os.path.dirname(__file__) + "/" + "MeasureData/" + "MagicBox_I_test.csv"
 
-move_schedule = "./sample/"
+move_schedule = "./MagicBox_TH_schedule.txt"
 
 
 #?----------------------------------------
@@ -153,12 +154,20 @@ def main():
             if not stage_control.move(ser, stageParameter["RouteMap"], move_step, (stageParameter["startCheckOrigin"],stageParameter["endCheckOrigin"])):
                 break
 
-            print("x"+ str(x_now), "y"+str(y_now))
+            print("x"+ str(x_now), "y"+str(y_now), "z"+str(z_now))
 
             move_step +=1
             FLAG = "WAIT"
 
             if x_now == x:
+                print(str(x_now) + '/' +str(x)  + ' ' + str(y_now) + '/' + str(y) )
+
+                if y_now >= y:
+                    x_now = 0
+                    y_now = 0
+                    z_now += interval[2]
+                    continue 
+
                 x_now = 0
                 y_now += interval[1]
                 continue

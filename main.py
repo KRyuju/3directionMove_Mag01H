@@ -30,13 +30,13 @@ fin
 average = 1
 
 #開始,終了時に機械原点を出すか
-startCheckOrigin = True
+startCheckOrigin = False
 endCheckOrigin = False
 
 # save_file = os.path.dirname(__file__) + "/" + "MeasureData/" + str(int(time.time())) + "_" + "" + ".txt"
-save_file = os.path.dirname(__file__) + "/" + "MeasureData/" + "MagicBox_I_test.csv"
+save_file = os.path.dirname(__file__) + "/" + "MeasureData/" + "MagicBoxB_Flip_I.csv"
 
-move_schedule = "./MagicBox_TH_schedule.txt"
+move_schedule = "./1213_MagicBoxB_schedule.txt"
 
 
 #?----------------------------------------

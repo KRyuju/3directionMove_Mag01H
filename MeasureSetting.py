@@ -21,20 +21,20 @@ Z_moveDirection_PushTrue = True
 #それぞれステージコントローラーの1, 2, 3 Axisに対応
 
 #測定を開始する位置 動作方向の端から
-start_x = 0    #mm （MAX ステージ長さ）（MIN 0 mm）
-start_y = 22   #mm
-start_z = 38.7   #mm
+start_x = 2.00   #mm （MAX ステージ長さ）（MIN 0 mm）
+start_y = 150.00   #mm
+start_z = 0.00   #mm
 
 #測定長さ 押引 どちらも正
-x = int((49000 - -1000)/100)   #mm  start_xから   ステージの動作範囲に注意!
-y = int((29200-2200)/100)   #mm  start_yから
-z = int((58700-38700)/1000)   #mm  start_zから
+x = int((41000 - 0)/100)   #mm  start_xから   ステージの動作範囲に注意!
+y = int((42800 - 15000)/100)   #mm  start_yから
+z = int((80000 - 0)/1000)   #mm  start_zから
 
 #測定間隔
-gridInterval = 100  #mm
+gridInterval = 10  #mm
 
 #出力ファイル
-FileName = os.path.dirname(__file__) + "/" + "MagicBox_TH_schedule_test.txt"
+FileName = os.path.dirname(__file__) + "/" + "1213_MagicBoxB_schedule.txt"
 #FileName = os.path.dirname(__file__) + "/" + "sample/" + str(int(time.time())) + "_" + "" + ".txt"
 
 """========================================="""
@@ -45,7 +45,7 @@ PulseRate = [100,100,1000,1000] #axis 1,2,3,4 pls/1mm
 
 
 X_PULSE_LIMIT = [-1000, 50000]
-Y_PULSE_LIMIT = [0, 30000]
+Y_PULSE_LIMIT = [0, 50000]
 Z_PULSE_LIMIT = [0, 150000]
 
 #OS(MS)33-500   -1000 ~ 49000
@@ -214,9 +214,9 @@ def move_schedule_A(position):
         p2 = "+P" + str(int(p[2]))
         p3 = "+P" + str(int(p[3]))
         
-        if p[1] < 0: p1 = "-P" + str(abs(p[1]))
-        if p[2] < 0: p2 = "-P" + str(abs(p[2]))
-        if p[3] < 0: p3 = "-P" + str(abs(p[3]))
+        if p[1] < 0: p1 = "-P" + str(int(abs(p[1])))
+        if p[2] < 0: p2 = "-P" + str(int(abs(p[2])))
+        if p[3] < 0: p3 = "-P" + str(int(abs(p[3])))
 
         if p[0] == 1: f.write("A:W" + p1 + p2 + p3 + "+P0\n")
 
@@ -282,9 +282,9 @@ def move_schedule_M(position):
     p_ = (0,0,0,0)
 
     for p in position:
-        p1 = "+P" + str(p[1] - p_[1])
-        p2 = "+P" + str(p[2] - p_[2])
-        p3 = "+P" + str(p[3] - p_[3])
+        p1 = "+P" + str(int(p[1] - p_[1]))
+        p2 = "+P" + str(int(p[2] - p_[2]))
+        p3 = "+P" + str(int(p[3] - p_[3]))
         
         if (p[1] - p_[1]) <= 0: p1 = "-P" + str(abs(p[1] - p_[1]))
         if (p[2] - p_[2]) <= 0: p2 = "-P" + str(abs(p[2] - p_[2]))

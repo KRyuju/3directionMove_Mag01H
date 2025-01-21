@@ -27,14 +27,14 @@ start_z = 0.00   #mm
 
 #測定長さ 押引 どちらも正
 x = int((41000 - 0)/100)   #mm  start_xから   ステージの動作範囲に注意!
-y = int((42800 - 15000)/100)   #mm  start_yから
+y = int((42500 - 15000)/100)   #mm  start_yから
 z = int((80000 - 0)/1000)   #mm  start_zから
 
 #測定間隔
 gridInterval = 10  #mm
 
 #出力ファイル
-FileName = os.path.dirname(__file__) + "/" + "1213_MagicBoxB_schedule.txt"
+FileName = os.path.dirname(__file__) + "/" + "0116_MagicBoxB_schedule.txt"
 #FileName = os.path.dirname(__file__) + "/" + "sample/" + str(int(time.time())) + "_" + "" + ".txt"
 
 """========================================="""

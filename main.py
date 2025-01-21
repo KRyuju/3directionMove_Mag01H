@@ -34,9 +34,9 @@ startCheckOrigin = False
 endCheckOrigin = False
 
 # save_file = os.path.dirname(__file__) + "/" + "MeasureData/" + str(int(time.time())) + "_" + "" + ".txt"
-save_file = os.path.dirname(__file__) + "/" + "MeasureData/" + "MagicBoxB_Flip_I.csv"
+save_file = os.path.dirname(__file__) + "/" + "MeasureData/" + "MagicBoxB_Flip_I2.csv"
 
-move_schedule = "./1213_MagicBoxB_schedule.txt"
+move_schedule = "./0116_MagicBoxB_schedule.txt"
 
 
 #?----------------------------------------

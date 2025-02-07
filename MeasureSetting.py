@@ -21,20 +21,20 @@ Z_moveDirection_PushTrue = True
 #それぞれステージコントローラーの1, 2, 3 Axisに対応
 
 #測定を開始する位置 動作方向の端から
-start_x = 2.00   #mm （MAX ステージ長さ）（MIN 0 mm）
-start_y = 150.00   #mm
-start_z = 0.00   #mm
+start_x = 221.60   #mm （MAX ステージ長さ）（MIN 0 mm）
+start_y = 253.20   #mm
+start_z = 12.420   #mm
 
 #測定長さ 押引 どちらも正
-x = int((41000 - 0)/100)   #mm  start_xから   ステージの動作範囲に注意!
-y = int((42500 - 15000)/100)   #mm  start_yから
-z = int((80000 - 0)/1000)   #mm  start_zから
+x = int((10000 - 0)/100)   #mm  start_xから   ステージの動作範囲に注意!
+y = int((6000 - 0)/100)   #mm  start_yから
+z = int((60000 - 0)/1000)   #mm  start_zから
 
 #測定間隔
 gridInterval = 10  #mm
 
 #出力ファイル
-FileName = os.path.dirname(__file__) + "/" + "0116_MagicBoxB_schedule.txt"
+FileName = os.path.dirname(__file__) + "/" + "0206_ShingoCoil_schedule.txt"
 #FileName = os.path.dirname(__file__) + "/" + "sample/" + str(int(time.time())) + "_" + "" + ".txt"
 
 """========================================="""
